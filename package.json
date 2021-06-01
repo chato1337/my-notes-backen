@@ -5,7 +5,8 @@
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "dev": "DEBUG=app:* nodemon index"
+    "dev": "DEBUG=app:* nodemon index",
+    "start": "node index"
   },
   "keywords": [],
   "author": "",

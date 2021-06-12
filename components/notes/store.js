@@ -22,7 +22,24 @@ async function addNote(request) {
 	newNote.save();
 }
 
+async function setNote(request) {
+	console.log(request);
+	const id = {_id: request._id}
+	const newData = {
+		title: request.title,
+		body: request.body,
+		footer: request.footer
+	}
+	const handleError = (err, doc) => {
+		if(err){
+			console.log(err)
+		}
+	}
+	Model.updateOne(id, newData, handleError)
+}
+
 module.exports = {
 	list: getNotes,
 	add: addNote,
+	edit: setNote,
 };

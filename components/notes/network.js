@@ -22,4 +22,15 @@ router.post("/note", (req, res) => {
 		.catch((error) => console.log(error));
 });
 
+router.put("/edit-note", (req, res) => {
+	//do it something
+	controller
+		.editNote(req.body)
+			.then(response => {
+				console.log('nota actualizada')
+				res.send("nota actualizada")
+			})
+			.catch(err => console.log(err))
+})
+
 module.exports = router;

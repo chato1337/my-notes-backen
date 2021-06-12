@@ -13,7 +13,15 @@ function addNote(request) {
 	});
 }
 
+function editNote(request) {
+	console.log(request)
+	return new Promise((resolve, reject) => {
+		resolve(store.edit(request))
+	})
+}
+
 module.exports = {
 	getNotes,
 	addNote,
+	editNote
 };

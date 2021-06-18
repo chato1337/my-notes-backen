@@ -6,7 +6,7 @@ router.get("/", (req, res) => {
 	controller
 		.getNotes()
 		.then((notesList) => {
-			console.log(notesList);
+			// console.log(notesList);
 			res.send(notesList);
 		})
 		.catch((error) => console.log(error));
@@ -29,6 +29,16 @@ router.put("/edit-note", (req, res) => {
 			.then(response => {
 				console.log('nota actualizada')
 				res.send("nota actualizada")
+			})
+			.catch(err => console.log(err))
+})
+
+router.delete("/delete", (req, res) => {
+	controller
+		.deleteNote(req.body)
+			.then(response => {
+				console.log("nota eliminada");
+				res.send("nota eliminada")
 			})
 			.catch(err => console.log(err))
 })

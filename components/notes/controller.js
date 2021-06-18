@@ -20,8 +20,15 @@ function editNote(request) {
 	})
 }
 
+function deleteNote(request) {
+	return new Promise((resolve, reject) => {
+		resolve(store.delete(request))
+	})
+}
+
 module.exports = {
 	getNotes,
 	addNote,
-	editNote
+	editNote,
+	deleteNote
 };

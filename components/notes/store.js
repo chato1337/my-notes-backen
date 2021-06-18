@@ -1,5 +1,6 @@
 const db = require("mongoose");
 const Model = require("./model");
+const response = require("../../network/response")
 
 //mongodb+srv://adminNotes:Z5n4vUqdTRLda3Fp@cluster0.q5dkp.mongodb.net/test
 const uri =
@@ -23,23 +24,22 @@ async function addNote(request) {
 }
 
 async function setNote(request) {
-	console.log(request);
 	const id = {_id: request._id}
 	const newData = {
 		title: request.title,
 		body: request.body,
 		footer: request.footer
 	}
-	const handleError = (err, doc) => {
-		if(err){
-			console.log(err)
-		}
-	}
-	Model.updateOne(id, newData, handleError)
+	Model.updateOne(id, newData, response.handleError)
+}
+
+async function deleteNote(request) {
+	Model.deleteOne(request, response.handleError)
 }
 
 module.exports = {
 	list: getNotes,
 	add: addNote,
 	edit: setNote,
+	delete: deleteNote
 };

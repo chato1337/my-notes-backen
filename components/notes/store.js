@@ -34,7 +34,7 @@ async function setNote(request) {
 }
 
 async function deleteNote(request) {
-	Model.deleteOne(request, response.handleError)
+	Model.findOneAndDelete(request, null, response.handleError)
 }
 
 module.exports = {

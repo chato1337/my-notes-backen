@@ -8,6 +8,11 @@ const noteSchema = new Schema({
 	footer: String,
 });
 
+//add color note
+noteSchema.add({
+	color: String,
+})
+
 const model = mongoose.model("notes", noteSchema);
 
 module.exports = model;

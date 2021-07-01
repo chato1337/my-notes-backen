@@ -5,7 +5,14 @@ const config = require('../../config')
 
 function buildAdminUser(password) {
     return {
+        password,
         username: config.username,
         email: config.email
     }
+}
+
+async function hasAdminUser(mongoDB) {
+    const adminUser = await mongoDB.getAll("users", {
+        //
+    })
 }

@@ -4,8 +4,9 @@ const bodyParser = require("body-parser");
 const routesNotes = require("./components/notes/network");
 const routesUsers = require("./components/users/network")
 const cors = require("cors");
-
 const app = express();
+const router = require('./network/routes')
+
 app.use(cors());
 
 app.use(bodyParser.json());

@@ -28,7 +28,8 @@ async function setNote(request) {
 	const newData = {
 		title: request.title,
 		body: request.body,
-		footer: request.footer
+		footer: request.footer,
+		color: request.color
 	}
 	Model.updateOne(id, newData, response.handleError)
 }

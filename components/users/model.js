@@ -9,6 +9,10 @@ const userSchema = new Schema({
     role: String
 })
 
+userSchema.add({
+    country: String
+})
+
 const model = mongoose.model("users", userSchema)
 
 module.exports = model

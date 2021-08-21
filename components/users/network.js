@@ -24,4 +24,11 @@ router.post("/signup", (req, res) => {
 		.catch((e) => console.log(e));
 });
 
+router.get("/customers", (req, res) => {
+	controller
+		.getUsers()
+		.then(userList => res.send(userList))
+		.catch(err => console.log(err))
+})
+
 module.exports = router;

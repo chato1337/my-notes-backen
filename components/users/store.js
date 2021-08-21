@@ -3,12 +3,18 @@ const jwt = require("jsonwebtoken")
 const config = require("../../config")
 const bcrypt = require("bcrypt")
 
+async function getUsers() {
+    const users = await Model.find()
+    return users
+}
+
 async function add(request) {
     const user = {
         username: request.username,
         email: request.email,
         password: await bcrypt.hash(request.password, 10),
-        role: request.role || 'user'
+        role: request.role || 'user',
+        country: request.country || 'col'
     }
 
     const newUser = new Model(user)
@@ -21,8 +27,12 @@ async function checkLogin(request) {
     const userFilter = {username: request.username}
     // console.log(userFilter);
     const user = await Model.findOne(userFilter)
+
+    if (!user) {
+        return 'invalid username or password'
+    }
+    
     //implements bcrypt
-    console.log(request.password, user.password);
     bcrypt.compare(request.password, user.password, (err, res) => {
         if(err) {
             console.log('error el auto no esta')
@@ -45,5 +55,6 @@ async function checkLogin(request) {
 
 module.exports = {
     add: add,
-    checkLogin: checkLogin
+    checkLogin: checkLogin,
+    list: getUsers
 }

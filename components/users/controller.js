@@ -12,7 +12,14 @@ function register(request) {
     })
 }
 
+function getUsers() {
+    return new Promise((resolve, reject) => {
+        resolve(store.list())
+    })
+}
+
 module.exports = {
     login,
-    register
+    register,
+    getUsers
 }

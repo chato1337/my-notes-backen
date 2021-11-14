@@ -7,7 +7,8 @@ const billsSchema = new Schema({
 	date: String,
 	money: String,
     owner: String,
-    extra: String
+    extra: String,
+	status: String
 });
 
 const model = mongoose.model("bills", billsSchema);

@@ -16,7 +16,8 @@ async function addBill(request) {
         date: request.date,
         money: request.money,
         owner: request.owner,
-        extra: request.extra
+        extra: request.extra,
+        status: request.status
     }
     console.log('bill: ', bill)
     console.log(Model)

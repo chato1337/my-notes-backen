@@ -12,10 +12,24 @@ router.get("/bills", (req, res) => {
 		.catch((error) => console.log(error));
 });
 
+router.get("/bill-history", (req, res) => {
+	controller
+		.getHistory()
+		.then(history => res.send(history))
+		.catch(err => console.log(err))
+})
+
 router.post("/add-pay", (req, res) => {
 	controller
 		.addPay(req.body)
-		.then((res) => res.send('pay added: ', res))
+		.then((response) => res.send(response))
+		.catch(err => console.log(err))
+})
+
+router.post("/approve-pay", (req, res) => {
+	controller
+		.approvePay(req.body)
+		.then(response => res.send(response))
 		.catch(err => console.log(err))
 })
 

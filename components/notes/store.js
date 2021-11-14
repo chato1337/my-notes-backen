@@ -10,7 +10,7 @@ db.Promise = global.Promise;
 
 db.connect(uri, { useNewUrlParser: true, useUnifiedTopology: true })
 	.then(() => console.log(`base de datos conectada con exito`))
-	.catch((err) => console.error(`error al conectar la base de datos`));
+	.catch((err) => console.error(`error al conectar la base de datos: ${err}`));
 
 async function getNotes() {
 	const notes = await Model.find();

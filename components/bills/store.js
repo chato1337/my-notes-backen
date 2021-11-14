@@ -1,4 +1,7 @@
 const Model = require("./model");
+const BillUtils = require("../../utils/billUtils")
+const NoteModel = require("../notes/model")
+const response = require("../../network/response")
 
 async function getBills() {
     const bills = await Model.find()
@@ -6,8 +9,29 @@ async function getBills() {
 }
 
 async function addPay(request) {
-    console.log('request')
-    //TODO: get bill and substract the req pay, store in other model the pay
+    const filter = {_id: request.id}
+    const bill = await Model.findOne(filter)
+    let updateValue;
+    let status = "pending"
+    if(request.concept === "credit"){
+        const sum = parseInt(bill.value) + parseInt(request.value)
+        updateValue = sum
+        status = "approved"
+        await Model.findByIdAndUpdate(request.id, { $set: { value: sum } }, { useFindAndModify: false })
+    }else {
+        const substract = bill.value - request.value
+        updateValue = substract
+        await Model.findByIdAndUpdate(request.id, { $set: { value: substract } }, { useFindAndModify: false })
+    }
+    const updatedBill = { ...bill, value: updateValue }
+    const ticket = BillUtils.generateTicket(updatedBill._doc, request.concept, request.value, status)
+    const newTicket = new NoteModel(ticket)
+    newTicket.save()
+    return updatedBill._doc
+}
+
+async function historyList () {
+    return await NoteModel.find({ color: "ticket" }).sort({_id: 'desc'})
 }
 
 async function addBill(request) {
@@ -19,16 +43,30 @@ async function addBill(request) {
         extra: request.extra,
         status: request.status
     }
-    console.log('bill: ', bill)
-    console.log(Model)
-    // return console.log(bill)
     const newBill = new Model(bill)
     newBill.save()
     return newBill
 }
 
+async function approve(request) {
+    const filter = {_id: request.id}
+    const ticket = await NoteModel.findOne(filter)
+    if(request.status === "Aprobar"){
+        const processTicket = BillUtils.approveTicket(ticket, "aprobado")
+        return await NoteModel.updateOne(filter, processTicket, response.handleError())
+    }else {
+        const bill = await Model.findOne({ _id: ticket.footer })
+        const sum = parseInt(bill.value) + parseInt(request.value)
+        await Model.findByIdAndUpdate(request.id, { $set: { value: sum } }, { useFindAndModify: false })
+        const processTicket = BillUtils.approveTicket(ticket, "rechazado")
+        return await NoteModel.updateOne(filter, processTicket, response.handleError())
+    }
+}
+
 module.exports = {
     list: getBills,
     addPay,
-    addBill
+    addBill,
+    historyList,
+    approve
 }

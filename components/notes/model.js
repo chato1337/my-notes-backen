@@ -13,6 +13,10 @@ noteSchema.add({
 	color: String,
 })
 
+noteSchema.add({
+	append: Object,
+})
+
 const model = mongoose.model("notes", noteSchema);
 
 module.exports = model;

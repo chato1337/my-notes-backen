@@ -1,4 +1,5 @@
 require('dotenv').config()
+require('./database')
 
 module.exports = {
 	port: process.env.PORT || 3001,
@@ -8,6 +9,6 @@ module.exports = {
 	username: "lalo",
 	password: "landa",
 	email: "me@me.com",
-	secret: "my-notes-back",
+	secret: process.env.SECRET_TOKEN || "my-notes-back",
 	apiKey: process.env.API_KEY || 'no-key'
 };

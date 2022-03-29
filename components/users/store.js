@@ -2,6 +2,7 @@ const Model = require("./model")
 const jwt = require("jsonwebtoken")
 const config = require("../../config")
 const bcrypt = require("bcrypt")
+const { signToken } = require('../../middleware/auth.handler')
 
 async function getUsers() {
     const users = await Model.find()
@@ -23,34 +24,16 @@ async function add(request) {
 }
 
 async function checkLogin(request) {
-    console.log('entro aqui')
     const userFilter = {username: request.username}
     // console.log(userFilter);
     const user = await Model.findOne(userFilter)
-
-    if (!user) {
-        return 'invalid username or password'
-    }
     
-    //implements bcrypt
-    bcrypt.compare(request.password, user.password, (err, res) => {
-        if(err) {
-            console.log('error el auto no esta')
-            console.log(err)
-        }
-        if(res) {
-            console.log('auth success')
-            // create jwt hash
-            const token = jwt.sign({
-                name: user.username,
-                id: user._id
-            }, config.secret)
-            return token
-        } else {
-            return 'the password not match'
-        }
-    })
-        
+    const payload = {
+        sub: user._id,
+        role: user.role
+    }
+
+    return { user, token: signToken(payload, config.secret) }
 }
 
 module.exports = {

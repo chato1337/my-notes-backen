@@ -7,8 +7,12 @@ const routesBills = require("./components/bills/network")
 const cors = require("cors");
 const app = express();
 const router = require('./network/routes')
+const passport = require('passport')
 
 app.use(cors());
+
+app.use(passport.initialize())
+require('./utils/auth')
 
 app.use(bodyParser.json());
 app.use(routesNotes);

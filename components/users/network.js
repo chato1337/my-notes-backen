@@ -1,18 +1,21 @@
 const express = require("express");
 const router = express.Router();
 const controller = require("./controller.js");
+const { checkApiKey } = require("../../middleware/auth.handler");
+const passport = require("passport");
 
-router.post("/login", (req, res) => {
-	controller
-		.login(req.body)
-		.then((auth) => {
-			res.header("auth-token", auth).json({
-				error: null,
-				data: { auth },
-			});
-		})
-		.catch((e) => console.log(e));
-});
+router.post(
+	"/login",
+	passport.authenticate("local", { session: false }),
+	(req, res) => {
+		controller
+			.login(req.body)
+			.then((authToken) => {
+				res.json(authToken)
+			})
+			.catch((e) => console.log(e));
+	}
+);
 
 router.post("/signup", (req, res) => {
 	controller
@@ -24,11 +27,11 @@ router.post("/signup", (req, res) => {
 		.catch((e) => console.log(e));
 });
 
-router.get("/customers", (req, res) => {
+router.get("/customers", checkApiKey, (req, res) => {
 	controller
 		.getUsers()
-		.then(userList => res.send(userList))
-		.catch(err => console.log(err))
-})
+		.then((userList) => res.send(userList))
+		.catch((err) => console.log(err));
+});
 
 module.exports = router;

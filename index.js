@@ -1,4 +1,5 @@
-const express = require("express");
+import express from 'express'
+import { NoteUtils } from './utils/noteUtils';
 const config = require("./config");
 const bodyParser = require("body-parser");
 const routesNotes = require("./components/notes/network");
@@ -8,6 +9,8 @@ const cors = require("cors");
 const app = express();
 const router = require('./network/routes')
 const passport = require('passport')
+
+NoteUtils.testTypescritp()
 
 app.use(cors());
 

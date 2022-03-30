@@ -1,9 +1,11 @@
+require('dotenv').config()
 const path = require("path");
 const webpack = require("webpack");
 const nodeExternals = require("webpack-node-externals");
 const NodemonPlugin = require('nodemon-webpack-plugin'); // Ding
 
 module.exports = {
+	mode: process.env.MODE,
 	entry: {
 		server: "./index.js",
 	},

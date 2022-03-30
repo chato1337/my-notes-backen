@@ -9,6 +9,7 @@ const cors = require("cors");
 const app = express();
 const router = require('./network/routes')
 const passport = require('passport')
+import { router as routesShop } from "./components/shop/network"
 
 NoteUtils.testTypescritp()
 
@@ -21,6 +22,7 @@ app.use(bodyParser.json());
 app.use(routesNotes);
 app.use(routesUsers)
 app.use(routesBills)
+app.use(routesShop)
 
 //server on
 app.listen(config.port, () => {

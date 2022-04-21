@@ -30,8 +30,9 @@ async function addPay(request) {
     return updatedBill._doc
 }
 
-async function historyList () {
-    return await NoteModel.find({ color: "ticket" }).sort({_id: 'desc'})
+async function historyList (id) {
+    // TODO: migrate to own model
+    return await NoteModel.find({ footer: id }).sort({_id: 'desc'})
 }
 
 async function addBill(request) {

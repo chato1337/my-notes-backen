@@ -6,9 +6,13 @@ function getBills() {
     })
 }
 
-function getHistory() {
+function getHistory(id) {
     return new Promise((resolve, reject) => {
-        resolve(store.historyList())
+        if(id == 'key-error') {
+            reject({error: 'key error'})
+        }else {
+            resolve(store.historyList(id))
+        }
     })
 }
 

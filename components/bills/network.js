@@ -29,9 +29,12 @@ router.get(
 
 router.get("/bill-history", (req, res) => {
 	controller
-		.getHistory()
+		.getHistory(req.query.id)
 		.then((history) => res.send(history))
-		.catch((err) => console.log(err));
+		.catch((err) => {
+			console.log(err)
+			res.send(err).status(401)
+		});
 });
 
 router.post("/add-pay", (req, res) => {

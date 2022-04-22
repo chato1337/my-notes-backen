@@ -9,6 +9,9 @@
     "start": "node dist/index.js",
     "build": "rm -rf dist && webpack --mode development"
   },
+  "engines": {
+    "node": "14.18.0"
+  },
   "keywords": [],
   "author": "",
   "license": "ISC",

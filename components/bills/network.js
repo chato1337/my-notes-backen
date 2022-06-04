@@ -5,7 +5,7 @@ const passport = require("passport");
 
 router.get("/bills", (req, res) => {
 	controller
-		.getBills()
+		.getBills(req.query.id)
 		.then((billList) => {
 			// console.log(billList);
 			res.send(billList);

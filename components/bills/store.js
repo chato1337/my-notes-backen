@@ -3,8 +3,9 @@ const BillUtils = require("../../utils/billUtils")
 const NoteModel = require("../notes/model")
 const response = require("../../network/response")
 
-async function getBills() {
-    const bills = await Model.find()
+async function getBills(userId) {
+    const filter = { user_id: userId }
+    const bills = await Model.find(filter)
     return bills
 }
 
@@ -37,12 +38,14 @@ async function historyList (id) {
 
 async function addBill(request) {
     const bill = {
+        user_id: request.user_id,
         value: request.value,
         date: request.date,
         money: request.money,
-        owner: request.owner,
+        owner_id: request.owner_id,
         extra: request.extra,
-        status: request.status
+        status: request.status,
+        concept: request.concept
     }
     const newBill = new Model(bill)
     newBill.save()

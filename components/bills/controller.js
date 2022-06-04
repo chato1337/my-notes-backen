@@ -1,8 +1,13 @@
 const store = require("./store");
 
-function getBills() {
+function getBills(userId) {
     return new Promise((resolve, reject) => {
-        resolve(store.list())
+        if (userId && userId.length > 0) {
+            resolve(store.list(userId))
+        }else {
+            console.error('bills controller invalid username: ', userId)
+            reject("invalid username")
+        }
     })
 }
 

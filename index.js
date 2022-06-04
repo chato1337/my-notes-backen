@@ -10,6 +10,7 @@ const app = express();
 const router = require('./network/routes')
 const passport = require('passport')
 import { router as routesShop } from "./components/shop/network"
+import { router as routesProfile } from "./components/profile/network"
 
 NoteUtils.testTypescritp()
 
@@ -23,6 +24,7 @@ app.use(routesNotes);
 app.use(routesUsers)
 app.use(routesBills)
 app.use(routesShop)
+app.use(routesProfile)
 
 //server on
 app.listen(config.port, () => {

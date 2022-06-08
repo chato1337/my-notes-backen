@@ -4,7 +4,6 @@ const config = require("./config");
 const bodyParser = require("body-parser");
 const routesNotes = require("./components/notes/network");
 const routesUsers = require("./components/users/network")
-const routesBills = require("./components/bills/network")
 const cors = require("cors");
 const app = express();
 const router = require('./network/routes')
@@ -12,6 +11,7 @@ const passport = require('passport')
 import { router as routesShop } from "./components/shop/network"
 import { router as routesProfile } from "./components/profile/network"
 import { router as routesHistory } from "./components/history-pay/network"
+import { router as routesBills } from "./components/bills/network"
 
 NoteUtils.testTypescritp()
 

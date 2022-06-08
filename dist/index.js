@@ -9,36 +9,6 @@
 /******/ (() => { // webpackBootstrap
 /******/ 	var __webpack_modules__ = ({
 
-/***/ "./components/bills/controller.js":
-/*!****************************************!*\
-  !*** ./components/bills/controller.js ***!
-  \****************************************/
-/***/ ((module, __unused_webpack_exports, __webpack_require__) => {
-
-eval("const store = __webpack_require__(/*! ./store */ \"./components/bills/store.js\");\n\nfunction getBills(userId) {\n    return new Promise((resolve, reject) => {\n        if (userId && userId.length > 0) {\n            resolve(store.list(userId))\n        }else {\n            console.error('bills controller invalid username: ', userId)\n            reject(\"invalid username\")\n        }\n    })\n}\n\nfunction getHistory(id) {\n    return new Promise((resolve, reject) => {\n        if(id == 'key-error') {\n            reject({error: 'key error'})\n        }else {\n            resolve(store.historyList(id))\n        }\n    })\n}\n\nfunction addPay(request) {\n    return new Promise((resolve, reject) => {\n        resolve(store.addPay(request))\n    })\n}\n\nfunction addBill(request) {\n    return new Promise((resolve, reject) => {\n        resolve(store.addBill(request))\n    })\n}\n\nfunction approvePay(request) {\n    return new Promise((resolve, reject) => {\n        resolve(store.approve(request))\n    })\n}\n\n\nmodule.exports = {\n    getBills,\n    addPay,\n    addBill,\n    getHistory,\n    approvePay\n}\n\n//# sourceURL=webpack://my-notes-backend/./components/bills/controller.js?");
-
-/***/ }),
-
-/***/ "./components/bills/network.js":
-/*!*************************************!*\
-  !*** ./components/bills/network.js ***!
-  \*************************************/
-/***/ ((module, __unused_webpack_exports, __webpack_require__) => {
-
-eval("const express = __webpack_require__(/*! express */ \"express\");\nconst router = express.Router();\nconst controller = __webpack_require__(/*! ./controller */ \"./components/bills/controller.js\");\nconst passport = __webpack_require__(/*! passport */ \"passport\");\n\nrouter.get(\"/bills\", (req, res) => {\n\tcontroller\n\t\t.getBills(req.query.id)\n\t\t.then((billList) => {\n\t\t\t// console.log(billList);\n\t\t\tres.send(billList);\n\t\t})\n\t\t.catch((error) => console.log(error));\n});\n\nrouter.get(\n\t\"/bills-auth\",\n\tpassport.authenticate(\"jwt\", { session: false }),\n\t(req, res) => {\n\t\tcontroller\n\t\t\t.getBills()\n\t\t\t.then((billList) => {\n\t\t\t\t// console.log(billList);\n\t\t\t\tres.send(billList);\n\t\t\t})\n\t\t\t.catch((error) => console.log(error));\n\t}\n);\n\nrouter.get(\"/bill-history\", (req, res) => {\n\tcontroller\n\t\t.getHistory(req.query.id)\n\t\t.then((history) => res.send(history))\n\t\t.catch((err) => {\n\t\t\tconsole.log(err)\n\t\t\tres.send(err).status(401)\n\t\t});\n});\n//remove on future\nrouter.post(\"/old-add-pay\", (req, res) => {\n\tcontroller\n\t\t.addPay(req.body)\n\t\t.then((response) => res.send(response))\n\t\t.catch((err) => console.log(err));\n});\n\n//remove on future\nrouter.post(\"/old-approve-pay\", (req, res) => {\n\tcontroller\n\t\t.approvePay(req.body)\n\t\t.then((response) => res.send(response))\n\t\t.catch((err) => console.log(err));\n});\n\nrouter.post(\"/add-bill\", (req, res) => {\n\tcontroller\n\t\t.addBill(req.body)\n\t\t.then(() => res.send(\"bill added\"))\n\t\t.catch((err) => console.log(err));\n});\n\nmodule.exports = router;\n\n\n//# sourceURL=webpack://my-notes-backend/./components/bills/network.js?");
-
-/***/ }),
-
-/***/ "./components/bills/store.js":
-/*!***********************************!*\
-  !*** ./components/bills/store.js ***!
-  \***********************************/
-/***/ ((module, __unused_webpack_exports, __webpack_require__) => {
-
-eval("const Model = __webpack_require__(/*! ./model */ \"./components/bills/model.ts\");\nconst BillUtils = __webpack_require__(/*! ../../utils/billUtils */ \"./utils/billUtils.js\")\nconst NoteModel = __webpack_require__(/*! ../notes/model */ \"./components/notes/model.js\")\nconst response = __webpack_require__(/*! ../../network/response */ \"./network/response.js\")\n\nasync function getBills(userId) {\n    const filter = { user_id: userId }\n    const bills = await Model.find(filter)\n    return bills\n}\n\nasync function addPay(request) {\n    const filter = {_id: request.id}\n    const bill = await Model.findOne(filter)\n    let updateValue;\n    let status = \"pending\"\n    if(request.concept === \"credit\"){\n        const sum = parseInt(bill.value) + parseInt(request.value)\n        updateValue = sum\n        status = \"approved\"\n        await Model.findByIdAndUpdate(request.id, { $set: { value: sum } }, { useFindAndModify: false })\n    }else {\n        const substract = bill.value - request.value\n        updateValue = substract\n        await Model.findByIdAndUpdate(request.id, { $set: { value: substract } }, { useFindAndModify: false })\n    }\n    const updatedBill = { ...bill, value: updateValue }\n    const ticket = BillUtils.generateTicket(updatedBill._doc, request.concept, request.value, status)\n    const newTicket = new NoteModel(ticket)\n    newTicket.save()\n    return updatedBill._doc\n}\n\nasync function historyList (id) {\n    // TODO: migrate to own model\n    return await NoteModel.find({ footer: id }).sort({_id: 'desc'})\n}\n\nasync function addBill(request) {\n    const bill = {\n        user_id: request.user_id,\n        value: request.value,\n        date: request.date,\n        money: request.money,\n        owner_id: request.owner_id,\n        extra: request.extra,\n        status: request.status,\n        concept: request.concept\n    }\n    const newBill = new Model(bill)\n    newBill.save()\n    return newBill\n}\n\nasync function approve(request) {\n    const filter = {_id: request.id}\n    const ticket = await NoteModel.findOne(filter)\n    if(request.status === \"Aprobar\"){\n        const processTicket = BillUtils.approveTicket(ticket, \"aprobado\")\n        return await NoteModel.updateOne(filter, processTicket, response.handleError())\n    }else {\n        const bill = await Model.findOne({ _id: ticket.footer })\n        const sum = parseInt(bill.value) + parseInt(request.value)\n        await Model.findByIdAndUpdate(request.id, { $set: { value: sum } }, { useFindAndModify: false })\n        const processTicket = BillUtils.approveTicket(ticket, \"rechazado\")\n        return await NoteModel.updateOne(filter, processTicket, response.handleError())\n    }\n}\n\nmodule.exports = {\n    list: getBills,\n    addPay,\n    addBill,\n    historyList,\n    approve\n}\n\n//# sourceURL=webpack://my-notes-backend/./components/bills/store.js?");
-
-/***/ }),
-
 /***/ "./components/notes/controller.js":
 /*!****************************************!*\
   !*** ./components/notes/controller.js ***!
@@ -146,7 +116,7 @@ eval("(__webpack_require__(/*! dotenv */ \"dotenv\").config)()\n__webpack_requir
 /***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
 
 "use strict";
-eval("__webpack_require__.r(__webpack_exports__);\n/* harmony import */ var express__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! express */ \"express\");\n/* harmony import */ var express__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(express__WEBPACK_IMPORTED_MODULE_0__);\n/* harmony import */ var _utils_noteUtils__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./utils/noteUtils */ \"./utils/noteUtils.ts\");\n/* harmony import */ var _components_shop_network__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./components/shop/network */ \"./components/shop/network.ts\");\n/* harmony import */ var _components_shop_network__WEBPACK_IMPORTED_MODULE_2___default = /*#__PURE__*/__webpack_require__.n(_components_shop_network__WEBPACK_IMPORTED_MODULE_2__);\n/* harmony import */ var _components_profile_network__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ./components/profile/network */ \"./components/profile/network.ts\");\n/* harmony import */ var _components_profile_network__WEBPACK_IMPORTED_MODULE_3___default = /*#__PURE__*/__webpack_require__.n(_components_profile_network__WEBPACK_IMPORTED_MODULE_3__);\n/* harmony import */ var _components_history_pay_network__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ./components/history-pay/network */ \"./components/history-pay/network.ts\");\n/* harmony import */ var _components_history_pay_network__WEBPACK_IMPORTED_MODULE_4___default = /*#__PURE__*/__webpack_require__.n(_components_history_pay_network__WEBPACK_IMPORTED_MODULE_4__);\n\n\nconst config = __webpack_require__(/*! ./config */ \"./config/index.js\");\nconst bodyParser = __webpack_require__(/*! body-parser */ \"body-parser\");\nconst routesNotes = __webpack_require__(/*! ./components/notes/network */ \"./components/notes/network.js\");\nconst routesUsers = __webpack_require__(/*! ./components/users/network */ \"./components/users/network.js\")\nconst routesBills = __webpack_require__(/*! ./components/bills/network */ \"./components/bills/network.js\")\nconst cors = __webpack_require__(/*! cors */ \"cors\");\nconst app = express__WEBPACK_IMPORTED_MODULE_0___default()();\nconst router = __webpack_require__(/*! ./network/routes */ \"./network/routes.js\")\nconst passport = __webpack_require__(/*! passport */ \"passport\")\n;\n\n\n\n_utils_noteUtils__WEBPACK_IMPORTED_MODULE_1__.NoteUtils.testTypescritp()\n\napp.use(cors());\n\napp.use(passport.initialize())\n__webpack_require__(/*! ./utils/auth */ \"./utils/auth/index.js\")\n\napp.use(bodyParser.json());\napp.use(routesNotes);\napp.use(routesUsers)\napp.use(routesBills)\napp.use(_components_shop_network__WEBPACK_IMPORTED_MODULE_2__.router)\napp.use(_components_profile_network__WEBPACK_IMPORTED_MODULE_3__.router)\napp.use(_components_history_pay_network__WEBPACK_IMPORTED_MODULE_4__.router)\n\n//server on\napp.listen(config.port, () => {\n\tconsole.log(`escuchando en el puerto ${config.host}:${config.port}`);\n});\n\n\n//# sourceURL=webpack://my-notes-backend/./index.js?");
+eval("__webpack_require__.r(__webpack_exports__);\n/* harmony import */ var express__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! express */ \"express\");\n/* harmony import */ var express__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(express__WEBPACK_IMPORTED_MODULE_0__);\n/* harmony import */ var _utils_noteUtils__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./utils/noteUtils */ \"./utils/noteUtils.ts\");\n/* harmony import */ var _components_shop_network__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./components/shop/network */ \"./components/shop/network.ts\");\n/* harmony import */ var _components_shop_network__WEBPACK_IMPORTED_MODULE_2___default = /*#__PURE__*/__webpack_require__.n(_components_shop_network__WEBPACK_IMPORTED_MODULE_2__);\n/* harmony import */ var _components_profile_network__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ./components/profile/network */ \"./components/profile/network.ts\");\n/* harmony import */ var _components_profile_network__WEBPACK_IMPORTED_MODULE_3___default = /*#__PURE__*/__webpack_require__.n(_components_profile_network__WEBPACK_IMPORTED_MODULE_3__);\n/* harmony import */ var _components_history_pay_network__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ./components/history-pay/network */ \"./components/history-pay/network.ts\");\n/* harmony import */ var _components_history_pay_network__WEBPACK_IMPORTED_MODULE_4___default = /*#__PURE__*/__webpack_require__.n(_components_history_pay_network__WEBPACK_IMPORTED_MODULE_4__);\n/* harmony import */ var _components_bills_network__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! ./components/bills/network */ \"./components/bills/network.ts\");\n/* harmony import */ var _components_bills_network__WEBPACK_IMPORTED_MODULE_5___default = /*#__PURE__*/__webpack_require__.n(_components_bills_network__WEBPACK_IMPORTED_MODULE_5__);\n\n\nconst config = __webpack_require__(/*! ./config */ \"./config/index.js\");\nconst bodyParser = __webpack_require__(/*! body-parser */ \"body-parser\");\nconst routesNotes = __webpack_require__(/*! ./components/notes/network */ \"./components/notes/network.js\");\nconst routesUsers = __webpack_require__(/*! ./components/users/network */ \"./components/users/network.js\")\nconst cors = __webpack_require__(/*! cors */ \"cors\");\nconst app = express__WEBPACK_IMPORTED_MODULE_0___default()();\nconst router = __webpack_require__(/*! ./network/routes */ \"./network/routes.js\")\nconst passport = __webpack_require__(/*! passport */ \"passport\")\n;\n\n\n\n\n_utils_noteUtils__WEBPACK_IMPORTED_MODULE_1__.NoteUtils.testTypescritp()\n\napp.use(cors());\n\napp.use(passport.initialize())\n__webpack_require__(/*! ./utils/auth */ \"./utils/auth/index.js\")\n\napp.use(bodyParser.json());\napp.use(routesNotes);\napp.use(routesUsers)\napp.use(_components_bills_network__WEBPACK_IMPORTED_MODULE_5__.router)\napp.use(_components_shop_network__WEBPACK_IMPORTED_MODULE_2__.router)\napp.use(_components_profile_network__WEBPACK_IMPORTED_MODULE_3__.router)\napp.use(_components_history_pay_network__WEBPACK_IMPORTED_MODULE_4__.router)\n\n//server on\napp.listen(config.port, () => {\n\tconsole.log(`escuchando en el puerto ${config.host}:${config.port}`);\n});\n\n\n//# sourceURL=webpack://my-notes-backend/./index.js?");
 
 /***/ }),
 
@@ -170,14 +140,47 @@ eval("//aqui se hace un redireccionador para simplificar el uso del archivo raiz
 
 /***/ }),
 
+/***/ "./components/bills/controller.ts":
+/*!****************************************!*\
+  !*** ./components/bills/controller.ts ***!
+  \****************************************/
+/***/ ((__unused_webpack_module, exports, __webpack_require__) => {
+
+"use strict";
+eval("\nObject.defineProperty(exports, \"__esModule\", ({ value: true }));\nexports.controller = void 0;\nconst store_1 = __webpack_require__(/*! ./store */ \"./components/bills/store.ts\");\nfunction getBills(userId) {\n    return new Promise((resolve, reject) => {\n        if (userId && userId.length > 0) {\n            resolve(store_1.store.list(userId));\n        }\n        else {\n            console.error('bills controller invalid username: ', userId);\n            reject(\"invalid username\");\n        }\n    });\n}\nfunction addBill(request) {\n    return new Promise((resolve, reject) => {\n        resolve(store_1.store.addBill(request));\n    });\n}\nexports.controller = {\n    getBills,\n    addBill,\n};\n\n\n//# sourceURL=webpack://my-notes-backend/./components/bills/controller.ts?");
+
+/***/ }),
+
 /***/ "./components/bills/model.ts":
 /*!***********************************!*\
   !*** ./components/bills/model.ts ***!
   \***********************************/
-/***/ ((__unused_webpack_module, exports, __webpack_require__) => {
+/***/ (function(__unused_webpack_module, exports, __webpack_require__) {
 
 "use strict";
-eval("\nObject.defineProperty(exports, \"__esModule\", ({ value: true }));\nexports.model = void 0;\nconst mongoose = __webpack_require__(/*! mongoose */ \"mongoose\");\nconst Schema = mongoose.Schema;\nconst billsSchema = new Schema({\n    user_id: String,\n    value: String,\n    date: String,\n    money: String,\n    owner_id: String,\n    extra: String,\n    status: String,\n    concept: String\n});\nexports.model = mongoose.model(\"bills\", billsSchema);\n\n\n//# sourceURL=webpack://my-notes-backend/./components/bills/model.ts?");
+eval("\nvar __importDefault = (this && this.__importDefault) || function (mod) {\n    return (mod && mod.__esModule) ? mod : { \"default\": mod };\n};\nObject.defineProperty(exports, \"__esModule\", ({ value: true }));\nexports.model = void 0;\nconst mongoose_1 = __importDefault(__webpack_require__(/*! mongoose */ \"mongoose\"));\nconst Schema = mongoose_1.default.Schema;\nconst billsSchema = new Schema({\n    user_id: String,\n    value: String,\n    date: String,\n    money: String,\n    owner_id: String,\n    extra: String,\n    status: String,\n    concept: String\n});\nexports.model = mongoose_1.default.model(\"bills\", billsSchema);\n\n\n//# sourceURL=webpack://my-notes-backend/./components/bills/model.ts?");
+
+/***/ }),
+
+/***/ "./components/bills/network.ts":
+/*!*************************************!*\
+  !*** ./components/bills/network.ts ***!
+  \*************************************/
+/***/ (function(__unused_webpack_module, exports, __webpack_require__) {
+
+"use strict";
+eval("\nvar __importDefault = (this && this.__importDefault) || function (mod) {\n    return (mod && mod.__esModule) ? mod : { \"default\": mod };\n};\nObject.defineProperty(exports, \"__esModule\", ({ value: true }));\nexports.router = void 0;\nconst express_1 = __importDefault(__webpack_require__(/*! express */ \"express\"));\nconst controller_1 = __webpack_require__(/*! ./controller */ \"./components/bills/controller.ts\");\nconst passport_1 = __importDefault(__webpack_require__(/*! passport */ \"passport\"));\nexports.router = express_1.default.Router();\nexports.router.get(\"/bills\", (req, res) => {\n    controller_1.controller\n        .getBills(req.query.id)\n        .then((billList) => {\n        // console.log(billList);\n        res.send(billList);\n    })\n        .catch((error) => console.log(error));\n});\nexports.router.get(\"/bills-auth\", passport_1.default.authenticate(\"jwt\", { session: false }), (req, res) => {\n    controller_1.controller\n        .getBills(req.query.id)\n        .then((billList) => {\n        // console.log(billList);\n        res.send(billList);\n    })\n        .catch((error) => console.log(error));\n});\nexports.router.post(\"/add-bill\", (req, res) => {\n    controller_1.controller\n        .addBill(req.body)\n        .then(() => res.send(\"bill added\"))\n        .catch((err) => console.log(err));\n});\n\n\n//# sourceURL=webpack://my-notes-backend/./components/bills/network.ts?");
+
+/***/ }),
+
+/***/ "./components/bills/store.ts":
+/*!***********************************!*\
+  !*** ./components/bills/store.ts ***!
+  \***********************************/
+/***/ (function(__unused_webpack_module, exports, __webpack_require__) {
+
+"use strict";
+eval("\nvar __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {\n    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }\n    return new (P || (P = Promise))(function (resolve, reject) {\n        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }\n        function rejected(value) { try { step(generator[\"throw\"](value)); } catch (e) { reject(e); } }\n        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }\n        step((generator = generator.apply(thisArg, _arguments || [])).next());\n    });\n};\nObject.defineProperty(exports, \"__esModule\", ({ value: true }));\nexports.store = void 0;\nconst model_1 = __webpack_require__(/*! ./model */ \"./components/bills/model.ts\");\nfunction getBills(userId) {\n    return __awaiter(this, void 0, void 0, function* () {\n        const filter = { user_id: userId };\n        const bills = yield model_1.model.find(filter);\n        return bills;\n    });\n}\nfunction addBill(request) {\n    return __awaiter(this, void 0, void 0, function* () {\n        const bill = {\n            user_id: request.user_id,\n            value: request.value,\n            date: request.date,\n            money: request.money,\n            owner_id: request.owner_id,\n            extra: request.extra,\n            status: request.status,\n            concept: request.concept\n        };\n        const newBill = new model_1.model(bill);\n        newBill.save();\n        return newBill;\n    });\n}\nexports.store = {\n    list: getBills,\n    addBill\n};\n\n\n//# sourceURL=webpack://my-notes-backend/./components/bills/store.ts?");
 
 /***/ }),
 
@@ -365,16 +368,6 @@ eval("const { Strategy } = __webpack_require__(/*! passport-local */ \"passport-
 
 /***/ }),
 
-/***/ "./utils/billUtils.js":
-/*!****************************!*\
-  !*** ./utils/billUtils.js ***!
-  \****************************/
-/***/ ((module, __unused_webpack_exports, __webpack_require__) => {
-
-eval("const luxon = __webpack_require__(/*! luxon */ \"luxon\")\n\nclass BillUtils {\n    static generateTicket = (billData, concept, value, statusBill = \"pending\") => {\n        // console.log(billData.money)\n        const currentDate = luxon.DateTime.now().toLocaleString()\n        const status = statusBill\n        return {\n            title: status,\n            body: `${currentDate} - ${value} ${billData.money} - ${concept}`,\n            footer: billData._id,\n            color: \"ticket\",\n            append: {\n                date: currentDate,\n                value: value,\n                money: billData.money,\n                concept: concept\n            },\n        }\n    }\n\n    static approveTicket = (ticket, status) => {\n        return {\n            title: status,\n            body: ticket.body,\n            footer: ticket.footer,\n            color: ticket.color,\n            append: ticket.append\n        }\n    }\n}\n\nmodule.exports = BillUtils\n\n//# sourceURL=webpack://my-notes-backend/./utils/billUtils.js?");
-
-/***/ }),
-
 /***/ "@hapi/boom":
 /*!*****************************!*\
   !*** external "@hapi/boom" ***!
@@ -449,17 +442,6 @@ module.exports = require("express");
 
 "use strict";
 module.exports = require("jsonwebtoken");
-
-/***/ }),
-
-/***/ "luxon":
-/*!************************!*\
-  !*** external "luxon" ***!
-  \************************/
-/***/ ((module) => {
-
-"use strict";
-module.exports = require("luxon");
 
 /***/ }),
 

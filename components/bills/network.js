@@ -36,15 +36,16 @@ router.get("/bill-history", (req, res) => {
 			res.send(err).status(401)
 		});
 });
-
-router.post("/add-pay", (req, res) => {
+//remove on future
+router.post("/old-add-pay", (req, res) => {
 	controller
 		.addPay(req.body)
 		.then((response) => res.send(response))
 		.catch((err) => console.log(err));
 });
 
-router.post("/approve-pay", (req, res) => {
+//remove on future
+router.post("/old-approve-pay", (req, res) => {
 	controller
 		.approvePay(req.body)
 		.then((response) => res.send(response))

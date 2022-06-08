@@ -11,6 +11,7 @@ const router = require('./network/routes')
 const passport = require('passport')
 import { router as routesShop } from "./components/shop/network"
 import { router as routesProfile } from "./components/profile/network"
+import { router as routesHistory } from "./components/history-pay/network"
 
 NoteUtils.testTypescritp()
 
@@ -25,6 +26,7 @@ app.use(routesUsers)
 app.use(routesBills)
 app.use(routesShop)
 app.use(routesProfile)
+app.use(routesHistory)
 
 //server on
 app.listen(config.port, () => {

@@ -6,7 +6,7 @@ import { Payload, Roles } from '../models';
 import { UserRequest } from '../models/user.model';
 
 function checkApiKey(req: Request, res: Response, next: NextFunction) {
-    const apiKey = req.headers['api'];
+    const apiKey = req.headers['apikey'];
     if(apiKey === config.apiKey) {
         next();
     }else {

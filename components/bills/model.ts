@@ -13,6 +13,5 @@ const billsSchema = new Schema({
 	concept: String
 });
 
-const model = mongoose.model("bills", billsSchema);
+export const model = mongoose.model("bills", billsSchema);
 
-module.exports = model;

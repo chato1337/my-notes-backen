@@ -11,13 +11,13 @@ router.get("/profile", (req: Request, res: Response) => {
 })
 
 router.post("/create-profile", (req: Request, res: Response) => {
-    controller.getProfile(req.body)
+    controller.createProfile(req.body)
         .then((profile: Profile) => res.send(profile))
         .catch((e: any) => console.log(e))
 })
 
 router.post("/update-profile", (req: Request, res: Response) => {
-    controller.getProfile(req.body)
+    controller.updateProfile(req.body)
         .then((profile: Profile) => res.send(profile))
         .catch((e: any) => console.log(e))
 })

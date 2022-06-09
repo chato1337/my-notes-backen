@@ -51,7 +51,7 @@ export const addHistoryPay = async (pay: AddPay) => {
 }
 
 export const approvePay = async (req: ApprovePay) => {
-    const filter = { _id: req._id }
+    const filter = { _id: req.id }
     const ticket: HistoryPay = await model.findOne(filter)
 
     if (req.status === 'approve') {
@@ -60,7 +60,7 @@ export const approvePay = async (req: ApprovePay) => {
     }else {
         const billAccount: Bill = await billModel.findOne({ _id: ticket.bill_id })
         const transactionResult = transactionPay(billAccount.value, req.value, 'credit')
-        await billModel.findByIdAndUpdate(req._id, { $set: { value: transactionResult.result } }, { useFindAndModify: false })
+        await billModel.findByIdAndUpdate(req.id, { $set: { value: transactionResult.result } }, { useFindAndModify: false })
         await model.updateOne(filter,  { $set: { status: 'approved' } }, { useFindAndModify: false })
         return `[success]: transaction rejected ${req.value}`
     }

@@ -15,7 +15,7 @@ export interface AddPay {
 }
 
 export interface ApprovePay {
-    _id: string,
+    id: string,
     value: number,
     status: string
 }

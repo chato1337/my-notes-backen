@@ -9,7 +9,13 @@ export interface HistoryPay {
 }
 
 export interface AddPay {
+    id: string,
+    value: number,
+    concept: 'pay' | 'payAll' | 'credit',
+}
+
+export interface ApprovePay {
     _id: string,
     value: number,
-    concept: string
+    status: string
 }

@@ -1,5 +1,5 @@
 import { addHistoryPay, approvePay, getHistoryPay, getHistoryPayList } from "./store"
-import { AddPay, HistoryPay } from '../../models/historyPay.model';
+import { AddPay, ApprovePay } from '../../models/historyPay.model';
 
 
 export function getHistory(id: string ) {
@@ -22,7 +22,7 @@ export function getHistoryList(id: string ) {
     })
 }
 
-export function add(pay: HistoryPay ) {
+export function add(pay: AddPay ) {
     return new Promise((resolve, reject) => {
         if(pay) {
             resolve(addHistoryPay(pay))
@@ -32,7 +32,7 @@ export function add(pay: HistoryPay ) {
     })
 }
 
-export function approve(ticket: AddPay ) {
+export function approve(ticket: ApprovePay ) {
     return new Promise((resolve, reject) => {
         if(ticket) {
             resolve(approvePay(ticket))

@@ -5,10 +5,12 @@ import { model as billModel } from '../bills/model'
 import { Bill } from '../../models/bill.model';
 
 const transactionPay = (billValue: number, reqValue: number, concept: 'pay' | 'payAll' | 'credit') => {
+    const rValue = Number(reqValue)
+    const bValue = Number(billValue)
     const OPERATIONS = {
-        credit: billValue + reqValue,
-        payAll: billValue - billValue,
-        pay: billValue - reqValue
+        credit: bValue + rValue,
+        payAll: bValue - bValue,
+        pay: bValue - rValue
     }
 
     const STATUS_RESULT = {
@@ -51,6 +53,7 @@ export const addHistoryPay = async (pay: AddPay) => {
 }
 
 export const approvePay = async (req: ApprovePay) => {
+    console.log(req)
     const filter = { _id: req.id }
     const ticket: HistoryPay = await model.findOne(filter)
 
@@ -60,11 +63,12 @@ export const approvePay = async (req: ApprovePay) => {
     }else {
         const billAccount: Bill = await billModel.findOne({ _id: ticket.bill_id })
         const transactionResult = transactionPay(billAccount.value, req.value, 'credit')
-        await billModel.findByIdAndUpdate(req.id, { $set: { value: transactionResult.result } }, { useFindAndModify: false })
-        await model.updateOne(filter,  { $set: { status: 'approved' } }, { useFindAndModify: false })
+        console.log(billAccount)
+        console.log(transactionResult)
+        await billModel.findByIdAndUpdate(billAccount._id, { $set: { value: transactionResult.result } }, { useFindAndModify: false })
+        await model.updateOne(filter,  { $set: { status: 'rejected' } }, { useFindAndModify: false })
         return `[success]: transaction rejected ${req.value}`
     }
-
 }
 
 export const getHistoryPay = async (id: string) => {

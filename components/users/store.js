@@ -13,7 +13,6 @@ async function add(request) {
     if (!request.password) {
         return "invalid password"
     }
-
     const user = {
         username: request.username,
         email: request.email,

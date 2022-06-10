@@ -24,7 +24,7 @@ router.post("/signup", (req, res) => {
 			console.log(auth);
 			res.send(auth);
 		})
-		.catch((e) => console.log(e));
+		.catch((e) => res.status(400).send(e));
 });
 
 router.get("/customers", checkApiKey, (req, res) => {

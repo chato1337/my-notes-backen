@@ -1,4 +1,5 @@
 const store = require("./store")
+const Model = require("./model")
 
 function login(request) {
     return new Promise((resolve, reject) => {
@@ -6,9 +7,16 @@ function login(request) {
     })
 }
 
-function register(request) {
+async function register(request) {
+    const userExist = await Model.findOne({ username: request.username })
+    const emailExist = await Model.findOne({ email: request.email })
     return new Promise((resolve, reject) => {
-        resolve(store.add(request))
+        if(userExist || emailExist) {
+            reject(`the user already exist ${request.username}`)
+        }else{
+            resolve(store.add(request))
+        }
+        
     })
 }
 
